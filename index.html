@@ -1,12 +1,262 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>stableworld Demo</title>
+    <title>StableWorld: Towards Stable and Consistent Long Interactive Video Generation</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Georgia, serif;
+            background: #ffffff;
+            color: #444;
+            text-align: center;
+        }
+
+        /* ---------------- HERO SECTION ---------------- */
+        .hero {
+            height: 100vh;
+            width: 100%;
+            padding: 0 20px;
+            background: url("stableworld_demo_2_01.png") center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 60px;
+            font-weight: 800;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(0,0,0,0.55);
+        }
+
+        .hero h2 {
+            font-size: 45px;
+            margin-top: 25px;
+            margin-bottom: 35px;
+            text-shadow: 0 0 12px rgba(0,0,0,0.55);
+        }
+
+        .authors {
+            font-size: 24px;
+            line-height: 36px;
+        }
+        .authors a {
+            color: #d1e2ff;
+            text-decoration: none;
+            font-weight: 650;
+        }
+        .authors a:hover {
+            text-decoration: underline;
+        }
+
+        .affiliations {
+            font-size: 22px;
+            margin-top: 12px;
+            color: #e6e6e6;
+        }
+
+        .footnote {
+            font-size: 16px;
+            margin-top: 12px;
+            color: #f0f0f0;
+        }
+
+        .hero-buttons {
+            margin-top: 35px;
+        }
+        .hero-buttons .btn {
+            display: inline-block;
+            margin: 8px;
+            padding: 12px 34px;
+            border-radius: 8px;
+            color: white;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid white;
+            text-decoration: none;
+            font-size: 18px;
+            backdrop-filter: blur(3px);
+            transition: 0.2s;
+        }
+        .hero-buttons .btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+        }
+
+        /* ---------------- SECTION UTILITIES ---------------- */
+        .section-divider-line {
+            width: 100%;
+            height: 1px;
+            background: rgba(160,185,220,0.35);
+            margin: 0;
+        }
+
+        .section {
+            padding: 16px 10px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+
+        .section-divider {
+            width: 80px;
+            height: 4px;
+            background: #f2c4c4;
+            margin: 10px auto 20px;
+        }
+
+        /* ---------------- VIDEO SECTION ---------------- */
+        .video-container {
+            width: 73%;   /* 比原来小 25% */
+            aspect-ratio: 16/9;
+            max-width: 1020px;   /* 大屏不超过 900px（你可以改） */
+            margin: 0 auto;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+        }
+
+
+        .video-grid {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto 25px auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.video-card {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.video-card video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.video-row-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 10px 0 8px;
+    text-align: left;
+    width: 90%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+        /* ---------------- ABSTRACT SECTION ---------------- */
+        .abstract-text {
+            /* color: #333; */
+            font-size: 16px;
+            line-height: 24px;
+            width: 62%;
+            max-width: 870px;   /* 大屏不超过 900px（你可以改） */
+            margin: 20px auto 25px;
+            text-align: left;
+        }
+
+
+        
+    /* .framework-container {
+        width: 85%;
+        max-width: 950px;
+        margin: 0 auto 20px auto;
+    }
+     */
+.framework-container {
+    width: 85%;
+    max-width: 1050px;   /* 图片最大宽度 */
+    margin: 0 auto 20px auto;
+}
+
+.framework-image {
+    width: 100%;         /* 自动缩放到容器宽度 */
+    border-radius: 10px; /* 圆角，可调 */
+    border: none;  /* 边框 */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12); /* 悬浮阴影 */
+}
+    
+    .framework-text {
+        width: 85%;
+        max-width: 1050px; 
+        margin: 20px auto;
+        font-size: 16px;
+        line-height: 24px;
+        color: #444;
+        text-align: left;
+    }
+
+/* 整个 BibTeX 卡片：标题和框融为一个组件 */
+.bibtex-card {
+    width: 97%;
+    max-width: 1160px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.08);
+    padding: 20px 24px 28px 24px;
+    text-align: left;
+}
+
+/* 标题在卡片左上 */
+.bibtex-header {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 右上角 Copy 按钮 */
+.copy-btn {
+    padding: 6px 14px;
+    background: #4a6cff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.copy-btn:hover {
+    background: #6f82ff;
+}
+
+/* BibTeX 代码框 */
+.bibtex-box {
+    background: #f7f9fc;
+    padding: 16px 18px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+    font-size: 18px;
+    line-height: 20px;
+    white-space: pre;
+}
+
+
+    </style>
 </head>
+
 <body>
-    <h1>Welcome to stableworld</h1>
-    <p>This is the project page for DiverseAR.</p>
-</body>
-</html>
+
