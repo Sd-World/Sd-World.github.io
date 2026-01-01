@@ -281,72 +281,114 @@
       text-align: center;
     }
 
-    /* Video grids */
-    .video-row-title{
-      font-size: 18px;
-      font-weight: 700;
-      margin: 10px auto 10px;
-      width: 90%;
-      max-width: 1200px;
-      text-align: left;
-      color: var(--light-text);
-    }
+/* =========================
+   Titles
+   ========================= */
 
-    .video-grid{
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto 22px auto;
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
-  /* 两列对比布局：左 Original / 右 StableWorld */
-  .compare-grid{
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto 22px auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-  }
-  
-  /* 卡片下面的小字 */
-  .video-caption{
-    padding: 8px 10px;
-    font-size: 14px;
-    color: var(--light-text-muted);
-    text-align: center;
-    background: #ffffff;
-    border-top: 1px solid rgba(0,0,0,0.06);
-  }
-  
-  @media (max-width: 900px){
-    .compare-grid{ grid-template-columns: 1fr; }
-  }
+/* 大标题：Matrix-Game vs StableWorld */
+.block-title{
+  font-size: 28px;
+  font-weight: 800;
+  margin: 32px auto 10px;
+  width: 90%;
+  max-width: 1200px;
+  text-align: left;
+  color: var(--light-text);
+}
 
-    .video-card{
-      position:relative;
-      border-radius: 12px;
-      overflow:hidden;
-      background: var(--light-bg-alt);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.10);
-    }
-    .video-card .card-thumb{
-      position:absolute;
-      inset:0;
-      background: linear-gradient(135deg, rgba(139,92,246,.10), rgba(6,182,212,.10)),
-                  #eef2ff;
-      opacity:1;
-      transition: opacity 200ms ease;
-      z-index:2;
-    }
-    .video-card.ready .card-thumb{ opacity:0; pointer-events:none; }
+/* 小标题：Video 1 / Video 2 ... */
+.video-row-title{
+  font-size: 18px;
+  font-weight: 800;
+  margin: 14px auto 10px;
+  width: 90%;
+  max-width: 1200px;
+  text-align: left;
+  color: var(--light-text);
+}
 
-    .video-card video{
-      width:100%;
-      height:auto;
-      display:block;
-    }
+/* =========================
+   Layouts
+   ========================= */
+
+/* 2列对比（Vanilla vs StableWorld） */
+.compare-grid{
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto 16px auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+/* 3列展示（如果你还需要三卡一行那种 gallery 才用） */
+.video-grid{
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto 22px auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* =========================
+   Cards
+   ========================= */
+
+.video-card{
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+}
+
+/* 可选：加载时的占位层（你想要就保留） */
+.video-card .card-thumb{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(139,92,246,.10), rgba(6,182,212,.10)), #eef2ff;
+  opacity: 1;
+  transition: opacity 200ms ease;
+  z-index: 2;
+}
+.video-card.ready .card-thumb{ opacity: 0; pointer-events: none; }
+
+.video-card video{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 卡片底下的小字（Vanilla / StableWorld） */
+.video-caption{
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--light-text-muted);
+  background: #ffffff;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+/* 提示文字 */
+.hint-text{
+  width: 90%;
+  max-width: 1200px;
+  margin: 6px auto 0;
+  color: var(--light-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 900px){
+  .compare-grid{ grid-template-columns: 1fr; }
+  .video-grid{ grid-template-columns: 1fr; } /* 可选：三列变一列 */
+}
+
 
     /* BibTeX */
     .bibtex-card{
@@ -643,86 +685,150 @@
     });
   }
 
-  /* ============ Matrix (bad vs good1) 2x compare ============ */
-  const HF_ROOT_BASE = "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/";
-  const MATRIX_BAD_BASE  = HF_ROOT_BASE + "matrix/bad/";
-  const MATRIX_GOOD_BASE = HF_ROOT_BASE + "matrix/good1/";
+/* ============ Compare Sections Config ============ */
+const HF_ROOT_BASE = "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/";
 
-  const MATRIX_FILES = [
-    "motion_3_icon.mp4",
-    "motion_image_icon.mp4",
-    "tmp_51s_59s.mp4",
-    "tmp_motion14_51s_59s.mp4",
-    "tmp_motion21_51s_59s.mp4",
-  ];
+/**
+ * 每个 section:
+ * - title: 大标题
+ * - leftLabel/rightLabel: 两列caption
+ * - leftBase/rightBase: HF路径
+ * - files: 这个section要展示的文件列表（顺序决定 Video1/2/3）
+ */
+const COMPARE_SECTIONS = [
+  {
+    key: "matrix",
+    title: "Matrix-Game 2.0: Vanilla vs StableWorld",
+    leftLabel: "Vanilla",
+    rightLabel: "StableWorld",
+    leftBase: HF_ROOT_BASE + "matrix/bad/",
+    rightBase: HF_ROOT_BASE + "matrix/good1/",
+    files: [
+      "motion_3_icon.mp4",
+      "motion_image_icon.mp4",
+      "tmp_51s_59s.mp4",
+      "tmp_motion14_51s_59s.mp4",
+      "tmp_motion21_51s_59s.mp4",
+    ],
+  },
 
-  function buildVideoCard(url, label) {
-    const card = document.createElement("div");
-    card.className = "video-card";
+  // ✅ 预留：你后续只要把 base 和 files 填上就会自动出来
+  {
+    key: "hunyuan",
+    title: "Hunyuan-GameCraft: Vanilla vs StableWorld",
+    leftLabel: "Vanilla",
+    rightLabel: "StableWorld",
+    leftBase: HF_ROOT_BASE + "hunyuan/bad/",     // TODO: 改成你的真实路径
+    rightBase: HF_ROOT_BASE + "hunyuan/good/",   // TODO
+    files: [
+      // TODO: 你的文件名
+      // "video1.mp4",
+      // "video2.mp4",
+    ],
+  },
 
-    const v = document.createElement("video");
-    v.src = url;
-    v.controls = true;
-    v.muted = true;
-    v.playsInline = true;
-    v.preload = "metadata";
-    card.appendChild(v);
+  {
+    key: "oasis",
+    title: "Open-Oasis: Vanilla vs StableWorld",
+    leftLabel: "Vanilla",
+    rightLabel: "StableWorld",
+    leftBase: HF_ROOT_BASE + "oasis/bad/",       // TODO
+    rightBase: HF_ROOT_BASE + "oasis/good/",     // TODO
+    files: [],
+  },
 
-    const cap = document.createElement("div");
-    cap.className = "video-caption";
-    cap.textContent = label;
-    card.appendChild(cap);
+  {
+    key: "long",
+    title: "Ultra-long Video Generation (thousands of frames)",
+    leftLabel: "Vanilla",
+    rightLabel: "StableWorld",
+    leftBase: HF_ROOT_BASE + "long/bad/",        // TODO
+    rightBase: HF_ROOT_BASE + "long/good/",      // TODO
+    files: [],
+  },
 
-    return card;
-  }
+  {
+    key: "selfforcing",
+    title: "Self-Forcing (Autoregressive Video): Vanilla vs StableWorld",
+    leftLabel: "Vanilla (Self-Forcing)",
+    rightLabel: "StableWorld",
+    leftBase: HF_ROOT_BASE + "selfforcing/bad/", // TODO
+    rightBase: HF_ROOT_BASE + "selfforcing/good/",// TODO
+    files: [],
+  },
+];
 
-  function renderMatrixCompare() {
-    const root = document.getElementById("resultsRoot");
-    if (!root) return;
+function buildVideoCard(url, label, maxSeconds=30) {
+  const card = document.createElement("div");
+  card.className = "video-card";
 
-    root.innerHTML = "";
+  const v = document.createElement("video");
+  v.src = url;
+  v.controls = true;
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = "metadata";
+  v.dataset.max = String(maxSeconds);  // ✅ 统一只循环前30秒（你要改60就改这里）
+  card.appendChild(v);
 
-    MATRIX_FILES.forEach((name) => {
-      const title = document.createElement("div");
-      title.className = "video-row-title";
-      title.textContent = name;
-      root.appendChild(title);
+  const cap = document.createElement("div");
+  cap.className = "video-caption";
+  cap.textContent = label;
+  card.appendChild(cap);
+
+  return card;
+}
+
+function renderCompareSections() {
+  const root = document.getElementById("resultsRoot");
+  if (!root) return;
+  root.innerHTML = "";
+
+  COMPARE_SECTIONS.forEach((sec) => {
+    // 如果 files 为空，就先不渲染（也可以渲染“Coming soon”，你说我就加）
+    if (!sec.files || sec.files.length === 0) return;
+
+    const blockTitle = document.createElement("div");
+    blockTitle.className = "block-title";
+    blockTitle.textContent = sec.title;
+    root.appendChild(blockTitle);
+
+    sec.files.forEach((fname, idx) => {
+      const rowTitle = document.createElement("div");
+      rowTitle.className = "video-row-title";
+      rowTitle.textContent = `Video ${idx + 1}`;
+      root.appendChild(rowTitle);
 
       const grid = document.createElement("div");
       grid.className = "compare-grid";
 
-      grid.appendChild(buildVideoCard(MATRIX_BAD_BASE + name,  "Original (matrix/bad)"));
-      grid.appendChild(buildVideoCard(MATRIX_GOOD_BASE + name, "StableWorld (matrix/good1)"));
+      grid.appendChild(buildVideoCard(sec.leftBase + fname,  sec.leftLabel));
+      grid.appendChild(buildVideoCard(sec.rightBase + fname, sec.rightLabel));
 
       root.appendChild(grid);
     });
-  }
-
-  // 强制只循环前 N 秒（适用于任何 <video data-max="30">）
-  function enforceMaxSeconds(){
-    document.querySelectorAll("video[data-max]").forEach(v => {
-      const max = parseFloat(v.dataset.max || "0");
-      if(!max || isNaN(max)) return;
-
-      v.addEventListener("timeupdate", () => {
-        if(v.currentTime >= max - 0.05){
-          v.currentTime = 0;
-          if(!v.paused) v.play().catch(()=>{});
-        }
-      });
-    });
-  }
-
-  function copyBibtex(){
-    const text = document.getElementById("bibtexText")?.textContent || "";
-    navigator.clipboard.writeText(text).then(()=> alert("BibTeX copied!"));
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    initHeroWall();
-    renderMatrixCompare();
-    enforceMaxSeconds();
   });
+}
+
+/* 你原来的 enforceMaxSeconds 保留即可 */
+function enforceMaxSeconds(){
+  document.querySelectorAll("video[data-max]").forEach(v => {
+    const max = parseFloat(v.dataset.max || "0");
+    if(!max || isNaN(max)) return;
+
+    v.addEventListener("timeupdate", () => {
+      if(v.currentTime >= max - 0.05){
+        v.currentTime = 0;
+        if(!v.paused) v.play().catch(()=>{});
+      }
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderCompareSections();
+  enforceMaxSeconds();
+});
 </script>
 
 </body>
