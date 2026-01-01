@@ -752,9 +752,9 @@ const COMPARE_SECTIONS = [
     mode: "triplet",                 // ✅ 新增：标记三并排
     base: HF_ROOT_BASE + "long/",    // ✅ 你的 long 目录（按你 HF 的真实结构改）
     files: [
-      "1.mp4",
-      "2.mp4",
-      "3.mp4",
+      "4.mp4",
+      "5.mp4",
+      "6.mp4",
     ],
     clipEnd: 195,                    // ✅ 3min15s
   },
@@ -768,9 +768,9 @@ const COMPARE_SECTIONS = [
     leftBase: HF_ROOT_BASE + "selfforcing/bad/", // TODO
     rightBase: HF_ROOT_BASE + "selfforcing/good/",// TODO
     files: [
-      { name: "1.mp4", clipEnd: 45 },  // ✅ 45s
+      { name: "1_45s.mp4", clipEnd: 45 },  // ✅ 45s
       { name: "2.mp4" },               // 原始长度
-      { name: "3.mp4", clipEnd: 30 },  // ✅ 30s
+      { name: "3.mp4"},  // ✅ 30s
       { name: "4.mp4" },               // 原始长度
     ],
 
