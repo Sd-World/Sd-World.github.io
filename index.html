@@ -823,30 +823,10 @@
     <!-- Abstract Section -->
     <section class="section" id="abstract">
       <h2 class="section-title">Abstract</h2>
-      <p class="abstract-text">
-        In this paper, we explore the overlooked challenge of
-        stability and temporal consistency in interactive video generation, which synthesizes dynamic and controllable
-        video
-        worlds through interactive behaviors such as camera move￾ments and text prompts. Despite remarkable progress in
-        world modeling, current methods still suffer from severe in￾stability and temporal degradation, often leading to
-        spa￾tial drift and scene collapse during long-horizon interac￾tions. To better understand this issue, we
-        initially investi￾gate the underlying causes of instability and identify that the major source of error
-        accumulation originates from
-        the same scene, where generated frames gradually deviate
-        from the initial clean state and propagate errors to sub￾sequent frames. Building upon this observation, we
-        pro￾pose a simple yet effective method, StableWorld, a Dynamic
-        Frame Eviction Mechanism. By continuously filtering out
-        degraded frames while retaining geometrically consistent
-        ones, StableWorld effectively prevents cumulative drift at
-        its source, leading to more stable and temporal consistency
-        of interactive generation. Promising results on multiple
-        interactive video models, e.g., Matrix-Game, Open-Oasis,
-        and HunyuanGameCraft, demonstrate that StableWorld is
-        modelagnostic and can be applied to different interactive
-        video generation frameworks to substantially improve stability, temporal consistency, and generalization across
-        di￾verse interactive scenarios
+  <p class="abstract-text">
+  In this paper, we explore the overlooked challenge of stability and temporal consistency in interactive video generation, which synthesizes dynamic and controllable video worlds through interactive behaviors such as camera movements and text prompts. Despite remarkable progress in world modeling, current methods still suffer from severe instability and temporal degradation, often leading to spatial drift and scene collapse during long-horizon interactions. To better understand this issue, we initially investigate the underlying causes of instability and identify that the major source of error accumulation originates from the same scene, where generated frames gradually deviate from the initial clean state and propagate errors to subsequent frames. Building upon this observation, we propose a simple yet effective method, <strong>StableWorld</strong>, a Dynamic Frame Eviction Mechanism. By continuously filtering out degraded frames while retaining geometrically consistent ones, StableWorld effectively prevents cumulative drift at its source, leading to more stable and temporal consistency of interactive generation. Promising results on multiple interactive video models, e.g., Matrix-Game, Open-Oasis, and Hunyuan-GameCraft, demonstrate that StableWorld is model-agnostic and can be applied to different interactive video generation frameworks to substantially improve stability, temporal consistency, and generalization across diverse interactive scenarios.
+  </p>
 
-      </p>
 
       <div class="teaser-container2">
 
