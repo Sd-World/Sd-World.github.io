@@ -163,31 +163,43 @@
       }
     }
 
-  .video-cell {
-    position: relative;
-    flex-shrink: 0;
-    width: calc(130vw / 5 - 5px);
-    height: 100%;
-    overflow: hidden;
-    border-radius: 8px;
-  
-    /* 关键：非黑色占位，打开立刻好看 */
-    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.08), rgba(0,0,0,0.9));
-  }
-  
-  .video-cell video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  
-    /* 关键：默认隐藏，加载出首帧再显示 */
-    opacity: 0;
-    transition: opacity .35s ease;
-  }
-  
-  .video-cell.is-ready video {
-    opacity: 1;
-  }
+.video-cell {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(130vw / 5 - 5px);
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #111;
+}
+
+/* 让 iframe 填满 */
+.video-cell iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* 缩略图盖层：先显示，避免黑屏 */
+.video-thumb {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05);
+  transform: scale(1.02);
+  transition: opacity 250ms ease;
+  opacity: 1;
+  z-index: 2;
+}
+
+.video-cell.ready .video-thumb {
+  opacity: 0;   /* iframe加载后淡出 */
+  pointer-events: none;
+}
+
 
 
     /* Light overlay for text readability - NO color tint */
@@ -1439,51 +1451,38 @@
       });
     });
   </script>
+  
 <script>
-  const HF_BASE =
-    "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/demo/";
-
-  const VIDEO_POOL = [
-    "motion_imgae1.mp4",
-    "motion_imgae1_icon.mp4",
-    "motion_imgae2.mp4",
-    "motion_imgae2_icon.mp4",
-    "motion_imgae3.mp4",
-    "motion_imgae3_icon.mp4",
-    "motion_imgae4.mp4",
-    "motion_imgae4_icon.mp4",
-    "motion_imgae5.mp4",
-    "motion_imgae5_icon.mp4",
-    "motion_imgae6.mp4",
-    "motion_imgae6_icon.mp4",
-    "motion_imgae7.mp4",
-    "motion_imgae7_icon.mp4",
-    "motion_imgae8.mp4",
-    "motion_imgae8_icon.mp4",
-    "motion_imgae9.mp4",
-    "motion_imgae9_icon.mp4",
-    "motion_imgae10.mp4",
-    "motion_imgae10_icon.mp4",
-    "motion_imgae11.mp4",
-    "motion_imgae11_icon.mp4",
-    "motion_imgae12.mp4",
-    "motion_imgae12_icon.mp4",
-    "motion_imgae13.mp4",
-    "motion_imgae13_icon.mp4",
-    "motion_imgae14.mp4",
-    "motion_imgae15.mp4",
-    "motion_imgae15_icon.mp4",
-    "motion_imgae16.mp4",
-    "motion_imgae17.mp4",
-    "motion_imgae21_icon.mp4",
-    "motion_imgae22.mp4",
-    "motion_imgae23.mp4",
-    "motion_imgae24_icon.mp4",
-    "motion_imgae25.mp4",
-    "motion_imgae25_icon.mp4",
-    "motion_imgae26.mp4",
-    "motion_imgae29_icon.mp4",
+  // 1) 你的 YouTube 链接（随便放多少）
+  const YT_URLS = [
+    "https://www.youtube.com/watch?v=1__6pInBTJw",
+    "https://www.youtube.com/watch?v=KAxQqSruAp8",
+    "https://www.youtube.com/watch?v=KAxQqSruAp8",
+    "https://www.youtube.com/watch?v=DZ5f4oUQ0Jw",
+    "https://youtu.be/Lgj1EEns5t8",
+    "https://youtu.be/7dWafMHVjWs",
+    "https://www.youtube.com/watch?v=wLEp2_9J9sw",
+    "https://www.youtube.com/watch?v=xRFcnVunEbQ",
+    "https://www.youtube.com/watch?v=vv8aQrGpp7E",
+    "https://www.youtube.com/watch?v=N5pVvQBfGv0",
+    "https://www.youtube.com/watch?v=qklj0ayKtHs",
+    "https://www.youtube.com/watch?v=ZHRvzdr_L_s",
+    "https://www.youtube.com/watch?v=YzaLNW52RuA",
+    "https://www.youtube.com/watch?v=EhP6L-vASVo",
+    "https://www.youtube.com/watch?v=zIbIRVrGQrA",
   ];
+
+  // 2) 提取 videoId
+  function getYouTubeId(url) {
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes("youtu.be")) return u.pathname.replace("/", "");
+      if (u.hostname.includes("youtube.com")) return u.searchParams.get("v");
+    } catch (e) {}
+    return null;
+  }
+
+  const YT_IDS = YT_URLS.map(getYouTubeId).filter(Boolean);
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -1494,57 +1493,64 @@
     return a;
   }
 
-  function buildCell(filename) {
+  // 3) 生成一个 cell：缩略图(立即显示) + iframe(慢慢加载)
+  function buildCell(videoId) {
     const cell = document.createElement("div");
     cell.className = "video-cell";
-  
-    const v = document.createElement("video");
-    v.autoplay = true;
-    v.muted = true;
-    v.loop = true;
-    v.playsInline = true;
-  
-    // 关键：更快拿到首帧（metadata 通常比 auto 更省）
-    v.preload = "metadata";
-  
-    // 关键：拿到首帧/可播放数据后，淡入显示
-    const onReady = () => cell.classList.add("is-ready");
-    v.addEventListener("loadeddata", onReady, { once: true });
-    v.addEventListener("canplay", onReady, { once: true });
-  
-    // 兜底：加载失败就保持占位，不要一片黑
-    v.addEventListener("error", () => {
-      cell.classList.add("is-ready"); // 也可以不加，让占位一直在
+
+    // 缩略图：先顶上，避免黑屏
+    const thumb = document.createElement("div");
+    thumb.className = "video-thumb";
+    // maxres 有时不存在，会 404；可以接受，浏览器会空白
+    // 稳妥一点你也可以改成 hqdefault.jpg
+    thumb.style.backgroundImage = `url(https://i.ytimg.com/vi/${videoId}/hqdefault.jpg)`;
+    cell.appendChild(thumb);
+
+    const iframe = document.createElement("iframe");
+    // loop 必须配 playlist=videoId 才生效
+    const src =
+      `https://www.youtube.com/embed/${videoId}` +
+      `?autoplay=1&mute=1&playsinline=1` +
+      `&controls=0&rel=0&modestbranding=1&iv_load_policy=3` +
+      `&loop=1&playlist=${videoId}`;
+
+    iframe.src = src;
+    iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+    iframe.loading = "eager"; // 尽量别懒加载（不保证，但有帮助）
+    iframe.addEventListener("load", () => {
+      // iframe 文档 load 后就淡出缩略图（避免黑块）
+      // 给一点点延迟，让首帧更稳
+      setTimeout(() => cell.classList.add("ready"), 150);
     });
-  
-    const s = document.createElement("source");
-    s.src = HF_BASE + encodeURIComponent(filename);
-    s.type = "video/mp4";
-  
-    v.appendChild(s);
-    cell.appendChild(v);
+
+    cell.appendChild(iframe);
     return cell;
   }
-
 
   document.addEventListener("DOMContentLoaded", () => {
     const rows = document.querySelectorAll("#videoWall .video-row");
 
-    rows.forEach((row) => {
+    rows.forEach((row, rowIdx) => {
       const count = parseInt(row.dataset.count || "10", 10);
-      let bag = shuffle(VIDEO_POOL);
 
+      // 这一行的第一段
+      let bag = shuffle(YT_IDS);
+      const firstBatch = [];
       for (let i = 0; i < count; i++) {
-        if (bag.length === 0) bag = shuffle(VIDEO_POOL);
-        row.appendChild(buildCell(bag.pop()));
+        if (bag.length === 0) bag = shuffle(YT_IDS);
+        const id = bag.pop();
+        const cell = buildCell(id);
+        row.appendChild(cell);
+        firstBatch.push(id);
       }
 
-      // 无缝滚动必须 duplicate 一次
-      const clones = Array.from(row.children).map(n => n.cloneNode(true));
-      clones.forEach(n => row.appendChild(n));
+      // 关键：无缝滚动必须 duplicate 一次（第二段）
+      // 用同样顺序复制，保证 -50% 对齐
+      firstBatch.forEach((id) => row.appendChild(buildCell(id)));
     });
   });
 </script>
+
 
 </body>
 
