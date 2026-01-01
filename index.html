@@ -472,7 +472,7 @@
         <sup>4</sup>Haofan Wang &nbsp;&nbsp;
         <sup>5</sup>Binxin Yang &nbsp;&nbsp;
         <sup>6</sup>Hubery Yin &nbsp;&nbsp;
-        <sup>6</sup>HChen Li &nbsp;&nbsp;
+        <sup>6</sup>Chen Li &nbsp;&nbsp;
         <sup>6</sup>Ziwei Liu &nbsp;&nbsp;
         <sup>6</sup>Chenyang Si
       </div>
@@ -654,6 +654,7 @@
     v.playsInline = true;
     v.preload = "metadata";
     v.src = src;
+    v.dataset.max = "30";  // ✅ hero 强制循环前 30 秒
 
     const markReady = () => setTimeout(() => cell.classList.add("ready"), 120);
     v.addEventListener("loadeddata", markReady);
@@ -786,7 +787,7 @@ function buildVideoCard(url, label, maxSeconds=null) {
   v.muted = true;
   v.playsInline = true;
   v.preload = "metadata";
-
+  
   // ✅ 只有传了 maxSeconds 才截断
   if (typeof maxSeconds === "number" && isFinite(maxSeconds) && maxSeconds > 0) {
     v.dataset.max = String(maxSeconds);
@@ -891,6 +892,11 @@ function renderCompareSections() {
 
   });
 }
+function copyBibtex(){
+  const el = document.getElementById("bibtexText");
+  if(!el) return;
+  navigator.clipboard.writeText(el.innerText || el.textContent || "").catch(()=>{});
+}
 
 /* 你原来的 enforceMaxSeconds 保留即可 */
 function enforceMaxSeconds(){
@@ -908,9 +914,11 @@ function enforceMaxSeconds(){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initHeroWall();          // ✅ 加上这一句
   renderCompareSections();
   enforceMaxSeconds();
 });
+
 </script>
 
 </body>
