@@ -839,144 +839,21 @@
 
 
 
+<section class="section" id="framework">
+  <h2 class="section-title">Overall Framework of StableWorld</h2>
 
+  <iframe
+    src="https://raw.githubusercontent.com/Sd-World/Sd-World.github.io/main/overnew.pdf"
+    style="width: 100%; height: 700px; border: none; margin-top: 1.5rem;"
+  ></iframe>
 
+  <p class="image-caption" style="text-align: center; margin-top: 1rem;">
+    StableWorld dynamically evicts degraded frames while retaining geometrically
+    consistent frames to prevent cumulative drift and improve temporal stability
+    in interactive video generation.
+  </p>
+</section>
 
-
-
-
-    <!-- Video Gallery Section -->
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">Scene collapse over time: a common promblem faced by current world models. </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- Experiments Section -->
-    <section class="section" id="experiments">
-      <h2 class="section-title">The Effect of different KV-cache window settings :</h2>
-
-      <img src="assets/images/1.png" alt="Metric" class="framework-image"
-        style="max-width: 85%; display: block; margin: 0 auto;">
-      <p class="image-caption" style="text-align: center;">
-        -Referring to cleaner and more reliable frames can slow down error accumulation.
-      </p>
-      <p class="image-caption" style="text-align: center;">
-        -Referring to the cleanest frames while keeping the window size fixed can minimize drift.
-      </p>
-
-    </section>
-
-
-    <!-- Video Gallery Section -->
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">However, rigidly preserves early frames fails to switch to a new scene </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
-      </div>
-      <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
-      </p>
-      </h2>
-
-    </section>
-
-
-
-    <!-- Experiments Section -->
-    <section class="section" id="experiments">
-      <h2 class="section-title">The introduction of StableWorld: A Dynamic Frame Eviction Mechanism
-        continuously filtering out degraded frames while retaining geometrically consistent ones
-      </h2>
-
-      <img src="assets/images/1.png" alt="Metric" class="framework-image"
-        style="max-width: 85%; display: block; margin: 0 auto;">
-
-
-    </section>
 
 
 
