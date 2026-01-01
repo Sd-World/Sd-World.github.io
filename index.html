@@ -724,8 +724,8 @@ const COMPARE_SECTIONS = [
       // TODO: 你的文件名
       "0005.mp4",
       "0008.mp4",
-      "00012.mp4",
-      "00014.mp4",
+      "0012.mp4",
+      "0014.mp4",
     ],
   },
 
@@ -767,11 +767,12 @@ const COMPARE_SECTIONS = [
     leftBase: HF_ROOT_BASE + "selfforcing/bad/", // TODO
     rightBase: HF_ROOT_BASE + "selfforcing/good/",// TODO
     files: [
-       "1.mp4",
-      "2.mp4",
-      "3.mp4",
-      "4.mp4",
-      ],
+      { name: "1.mp4", clipEnd: 45 },  // ✅ 45s
+      { name: "2.mp4" },               // 原始长度
+      { name: "3.mp4", clipEnd: 30 },  // ✅ 30s
+      { name: "4.mp4" },               // 原始长度
+    ],
+
   },
 ];
 
@@ -864,22 +865,30 @@ function renderCompareSections() {
     }
 
     // ================= 原来的对比逻辑（Vanilla vs StableWorld） =================
-    sec.files.forEach((fname, idx) => {
+    sec.files.forEach((item, idx) => {
+      const fname   = (typeof item === "string") ? item : item.name;
+      const clipEnd = (typeof item === "object" && typeof item.clipEnd === "number")
+                        ? item.clipEnd
+                        : ((typeof sec.clipEnd === "number") ? sec.clipEnd : null);
+    
       const rowTitle = document.createElement("div");
       rowTitle.className = "video-row-title";
       rowTitle.textContent = `Video ${idx + 1}`;
       root.appendChild(rowTitle);
-
+    
       const grid = document.createElement("div");
       grid.className = "compare-grid";
-
-      const maxS = (typeof sec.clipEnd === "number" && isFinite(sec.clipEnd)) ? sec.clipEnd : null;
-      
-      grid.appendChild(buildVideoCard(sec.leftBase + fname,  sec.leftLabel,  maxS));
-      grid.appendChild(buildVideoCard(sec.rightBase + fname, sec.rightLabel, maxS));
-
+    
+      grid.appendChild(
+        buildVideoCard(sec.leftBase + fname,  sec.leftLabel,  clipEnd)
+      );
+      grid.appendChild(
+        buildVideoCard(sec.rightBase + fname, sec.rightLabel, clipEnd)
+      );
+    
       root.appendChild(grid);
     });
+
   });
 }
 
