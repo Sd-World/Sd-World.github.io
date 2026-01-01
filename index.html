@@ -570,9 +570,9 @@
 
       <div id="resultsRoot"></div>
 
-      <p class="abstract-text" style="margin-top: 10px;">
+      <!-- <p class="abstract-text" style="margin-top: 10px;">
         Tip: All demo videos below are configured to loop only the first <strong>30 seconds</strong>.
-      </p>
+      </p> -->
     </section>
 
     <div class="section-divider-line"></div>
@@ -698,7 +698,7 @@ const HF_ROOT_BASE = "https://huggingface.co/datasets/yycfq/stableworld/resolve/
 const COMPARE_SECTIONS = [
   {
     key: "matrix",
-    title: "Matrix-Game 2.0: Vanilla vs StableWorld",
+    title: "Matrix-Game 2.0: Vanilla and StableWorld",
     leftLabel: "Vanilla",
     rightLabel: "StableWorld",
     leftBase: HF_ROOT_BASE + "matrix/bad/",
@@ -715,37 +715,49 @@ const COMPARE_SECTIONS = [
   // ✅ 预留：你后续只要把 base 和 files 填上就会自动出来
   {
     key: "hunyuan",
-    title: "Hunyuan-GameCraft: Vanilla vs StableWorld",
+    title: "Hunyuan-GameCraft: Vanilla and StableWorld",
     leftLabel: "Vanilla",
     rightLabel: "StableWorld",
     leftBase: HF_ROOT_BASE + "hunyuan/bad/",     // TODO: 改成你的真实路径
     rightBase: HF_ROOT_BASE + "hunyuan/good/",   // TODO
     files: [
       // TODO: 你的文件名
-      // "video1.mp4",
-      // "video2.mp4",
+      "0005.mp4",
+      "0008.mp4",
+      "00012.mp4",
+      "00014.mp4",
     ],
   },
 
-  {
-    key: "oasis",
-    title: "Open-Oasis: Vanilla vs StableWorld",
-    leftLabel: "Vanilla",
-    rightLabel: "StableWorld",
-    leftBase: HF_ROOT_BASE + "oasis/bad/",       // TODO
-    rightBase: HF_ROOT_BASE + "oasis/good/",     // TODO
-    files: [],
-  },
+{
+  key: "oasis",
+  title: "Open-Oasis: Vanilla and StableWorld",
+  leftLabel: "Vanilla",
+  rightLabel: "StableWorld",
+  leftBase: HF_ROOT_BASE + "oasis/bad/",
+  rightBase: HF_ROOT_BASE + "oasis/good/",
+  files: [
+    "1005.mp4",
+    "1370.mp4",
+    "688.mp4",
+  ],
+  clipEnd: 60, // ✅ 只对比 1 分钟
+},
 
-  {
+
+    {
     key: "long",
     title: "Ultra-long Video Generation (thousands of frames)",
-    leftLabel: "Vanilla",
-    rightLabel: "StableWorld",
-    leftBase: HF_ROOT_BASE + "long/bad/",        // TODO
-    rightBase: HF_ROOT_BASE + "long/good/",      // TODO
-    files: [],
+    mode: "triplet",                 // ✅ 新增：标记三并排
+    base: HF_ROOT_BASE + "long/",    // ✅ 你的 long 目录（按你 HF 的真实结构改）
+    files: [
+      "a.mp4",
+      "b.mp4",
+      "c.mp4",
+    ],
+    clipEnd: 195,                    // ✅ 3min15s
   },
+
 
   {
     key: "selfforcing",
@@ -754,11 +766,16 @@ const COMPARE_SECTIONS = [
     rightLabel: "StableWorld",
     leftBase: HF_ROOT_BASE + "selfforcing/bad/", // TODO
     rightBase: HF_ROOT_BASE + "selfforcing/good/",// TODO
-    files: [],
+    files: [
+       "1.mp4",
+      "2.mp4",
+      "3.mp4",
+      "4.mp4",
+      ],
   },
 ];
 
-function buildVideoCard(url, label, maxSeconds=30) {
+function buildVideoCard(url, label, maxSeconds=null) {
   const card = document.createElement("div");
   card.className = "video-card";
 
@@ -768,7 +785,33 @@ function buildVideoCard(url, label, maxSeconds=30) {
   v.muted = true;
   v.playsInline = true;
   v.preload = "metadata";
-  v.dataset.max = String(maxSeconds);  // ✅ 统一只循环前30秒（你要改60就改这里）
+
+  // ✅ 只有传了 maxSeconds 才截断
+  if (typeof maxSeconds === "number" && isFinite(maxSeconds) && maxSeconds > 0) {
+    v.dataset.max = String(maxSeconds);
+  }
+
+  card.appendChild(v);
+
+  const cap = document.createElement("div");
+  cap.className = "video-caption";
+  cap.textContent = label;
+  card.appendChild(cap);
+
+  return card;
+}
+
+function buildSingleVideoCard(url, label, maxSeconds=195) {
+  const card = document.createElement("div");
+  card.className = "video-card";
+
+  const v = document.createElement("video");
+  v.src = url;
+  v.controls = true;
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = "metadata";
+  v.dataset.max = String(maxSeconds);
   card.appendChild(v);
 
   const cap = document.createElement("div");
@@ -785,7 +828,6 @@ function renderCompareSections() {
   root.innerHTML = "";
 
   COMPARE_SECTIONS.forEach((sec) => {
-    // 如果 files 为空，就先不渲染（也可以渲染“Coming soon”，你说我就加）
     if (!sec.files || sec.files.length === 0) return;
 
     const blockTitle = document.createElement("div");
@@ -793,6 +835,35 @@ function renderCompareSections() {
     blockTitle.textContent = sec.title;
     root.appendChild(blockTitle);
 
+    // ✅ long：三并排（不做对比）
+    if (sec.key === "long" || sec.mode === "triplet") {
+      const grid = document.createElement("div");
+      grid.className = "video-grid"; // 你CSS里已经是3列grid了
+
+      const maxS = sec.clipEnd || 195;
+
+      sec.files.forEach((fname, idx) => {
+        grid.appendChild(
+          buildSingleVideoCard(
+            (sec.base || "") + fname,
+            `Video ${idx + 1}`,
+            maxS
+          )
+        );
+      });
+
+      root.appendChild(grid);
+
+      // 可选：提示文字
+      const hint = document.createElement("div");
+      hint.className = "hint-text";
+      hint.innerHTML = `Tip: These videos are configured to loop only the first <strong>3:15</strong>.`;
+      root.appendChild(hint);
+
+      return; // ✅ long section 完成，跳过下面的对比逻辑
+    }
+
+    // ================= 原来的对比逻辑（Vanilla vs StableWorld） =================
     sec.files.forEach((fname, idx) => {
       const rowTitle = document.createElement("div");
       rowTitle.className = "video-row-title";
@@ -802,8 +873,10 @@ function renderCompareSections() {
       const grid = document.createElement("div");
       grid.className = "compare-grid";
 
-      grid.appendChild(buildVideoCard(sec.leftBase + fname,  sec.leftLabel));
-      grid.appendChild(buildVideoCard(sec.rightBase + fname, sec.rightLabel));
+      const maxS = (typeof sec.clipEnd === "number" && isFinite(sec.clipEnd)) ? sec.clipEnd : null;
+      
+      grid.appendChild(buildVideoCard(sec.leftBase + fname,  sec.leftLabel,  maxS));
+      grid.appendChild(buildVideoCard(sec.rightBase + fname, sec.rightLabel, maxS));
 
       root.appendChild(grid);
     });
