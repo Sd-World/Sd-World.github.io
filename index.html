@@ -300,6 +300,29 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 18px;
     }
+  /* 两列对比布局：左 Original / 右 StableWorld */
+  .compare-grid{
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto 22px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  
+  /* 卡片下面的小字 */
+  .video-caption{
+    padding: 8px 10px;
+    font-size: 14px;
+    color: var(--light-text-muted);
+    text-align: center;
+    background: #ffffff;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  
+  @media (max-width: 900px){
+    .compare-grid{ grid-template-columns: 1fr; }
+  }
 
     .video-card{
       position:relative;
@@ -531,209 +554,176 @@
 
   </main>
 
-  <script>
-    /* ============ 你 HF 视频池（hero 背景用） ============ */
-    const HF_BASE = "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/demo/";
+<script>
+  /* ============ HF 视频池（hero 背景用） ============ */
+  const HF_DEMO_BASE = "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/demo/";
 
-    const VIDEO_POOL = [
-      "motion_imgae1.mp4","motion_imgae1_icon.mp4",
-      "motion_imgae2.mp4","motion_imgae2_icon.mp4",
-      "motion_imgae3.mp4","motion_imgae3_icon.mp4",
-      "motion_imgae4.mp4","motion_imgae4_icon.mp4",
-      "motion_imgae5.mp4","motion_imgae5_icon.mp4",
-      "motion_imgae6.mp4","motion_imgae6_icon.mp4",
-      "motion_imgae7.mp4","motion_imgae7_icon.mp4",
-      "motion_imgae8.mp4","motion_imgae8_icon.mp4",
-      "motion_imgae9.mp4","motion_imgae9_icon.mp4",
-      "motion_imgae10.mp4","motion_imgae10_icon.mp4",
-      "motion_imgae11.mp4","motion_imgae11_icon.mp4",
-      "motion_imgae12.mp4","motion_imgae12_icon.mp4",
-      "motion_imgae13.mp4","motion_imgae13_icon.mp4",
-      "motion_imgae14.mp4",
-      "motion_imgae15.mp4","motion_imgae15_icon.mp4",
-      "motion_imgae16.mp4",
-      "motion_imgae17.mp4",
-      "motion_imgae21_icon.mp4",
-      "motion_imgae22.mp4",
-      "motion_imgae23.mp4",
-      "motion_imgae24_icon.mp4",
-      "motion_imgae25.mp4","motion_imgae25_icon.mp4",
-      "motion_imgae26.mp4",
-      "motion_imgae29_icon.mp4"
-    ];
+  const VIDEO_POOL = [
+    "motion_imgae1.mp4","motion_imgae1_icon.mp4",
+    "motion_imgae2.mp4","motion_imgae2_icon.mp4",
+    "motion_imgae3.mp4","motion_imgae3_icon.mp4",
+    "motion_imgae4.mp4","motion_imgae4_icon.mp4",
+    "motion_imgae5.mp4","motion_imgae5_icon.mp4",
+    "motion_imgae6.mp4","motion_imgae6_icon.mp4",
+    "motion_imgae7.mp4","motion_imgae7_icon.mp4",
+    "motion_imgae8.mp4","motion_imgae8_icon.mp4",
+    "motion_imgae9.mp4","motion_imgae9_icon.mp4",
+    "motion_imgae10.mp4","motion_imgae10_icon.mp4",
+    "motion_imgae11.mp4","motion_imgae11_icon.mp4",
+    "motion_imgae12.mp4","motion_imgae12_icon.mp4",
+    "motion_imgae13.mp4","motion_imgae13_icon.mp4",
+    "motion_imgae14.mp4",
+    "motion_imgae15.mp4","motion_imgae15_icon.mp4",
+    "motion_imgae16.mp4",
+    "motion_imgae17.mp4",
+    "motion_imgae21_icon.mp4",
+    "motion_imgae22.mp4",
+    "motion_imgae23.mp4",
+    "motion_imgae24_icon.mp4",
+    "motion_imgae25.mp4","motion_imgae25_icon.mp4",
+    "motion_imgae26.mp4",
+    "motion_imgae29_icon.mp4"
+  ];
 
-    // Hero 背景建议用 _icon 版省流量（你要全用也行）
-    const HERO_VIDEOS = VIDEO_POOL.filter(v => v.includes("_icon")) ;
-    const HERO_FALLBACK = VIDEO_POOL.slice(); // 如果 icon 不够会用这个补
+  const HERO_VIDEOS = VIDEO_POOL.filter(v => v.includes("_icon"));
+  const HERO_FALLBACK = VIDEO_POOL.slice();
 
-    function shuffle(arr){
-      const a = arr.slice();
-      for(let i=a.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]]=[a[j],a[i]];
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function buildHeroCell(src){
+    const cell = document.createElement("div");
+    cell.className = "video-cell";
+
+    const thumb = document.createElement("div");
+    thumb.className = "video-thumb";
+    cell.appendChild(thumb);
+
+    const v = document.createElement("video");
+    v.muted = true;
+    v.autoplay = true;
+    v.loop = true;
+    v.playsInline = true;
+    v.preload = "metadata";
+    v.src = src;
+
+    const markReady = () => setTimeout(() => cell.classList.add("ready"), 120);
+    v.addEventListener("loadeddata", markReady);
+    v.addEventListener("canplay", markReady);
+
+    cell.appendChild(v);
+    return cell;
+  }
+
+  function initHeroWall(){
+    const rows = document.querySelectorAll("#videoWall .video-row");
+    rows.forEach(row => {
+      const count = parseInt(row.dataset.count || "10", 10);
+
+      let bag = shuffle(HERO_VIDEOS.length ? HERO_VIDEOS : HERO_FALLBACK);
+      const firstBatch = [];
+
+      for(let i=0;i<count;i++){
+        if(bag.length === 0) bag = shuffle(HERO_FALLBACK);
+        const name = bag.pop();
+        row.appendChild(buildHeroCell(HF_DEMO_BASE + name));
+        firstBatch.push(name);
       }
-      return a;
-    }
 
-    function buildHeroCell(src){
-      const cell = document.createElement("div");
-      cell.className = "video-cell";
-
-      const thumb = document.createElement("div");
-      thumb.className = "video-thumb";
-      cell.appendChild(thumb);
-
-      const v = document.createElement("video");
-      v.muted = true;
-      v.autoplay = true;
-      v.loop = true;
-      v.playsInline = true;
-      v.preload = "metadata";
-      v.src = src;
-
-      // 视频能播了就把 thumb 淡掉，避免黑屏
-      const markReady = () => {
-        // 给一点延迟，首帧更稳
-        setTimeout(() => cell.classList.add("ready"), 120);
-      };
-      v.addEventListener("loadeddata", markReady);
-      v.addEventListener("canplay", markReady);
-
-      cell.appendChild(v);
-      return cell;
-    }
-
-    /* ============ 结果区：你只需要改这个配置就能加/删视频 ============ */
-    const RESULTS_GROUPS = [
-      {
-        title: "Matrix-Game 2.0 (Vanilla vs StableWorld)",
-        // 这里先示例用你 demo 目录里的若干 mp4，你可以换成真实结果视频
-        videos: [
-          { url: HF_BASE + "motion_imgae1.mp4", caption: "Vanilla" },
-          { url: HF_BASE + "motion_imgae2.mp4", caption: "StableWorld" },
-          { url: HF_BASE + "motion_imgae3.mp4", caption: "StableWorld" },
-        ]
-      },
-      {
-        title: "Open-Oasis (Vanilla vs StableWorld)",
-        videos: [
-          { url: HF_BASE + "motion_imgae4.mp4", caption: "Vanilla" },
-          { url: HF_BASE + "motion_imgae5.mp4", caption: "StableWorld" },
-          { url: HF_BASE + "motion_imgae6.mp4", caption: "StableWorld" },
-        ]
-      },
-      {
-        title: "Hunyuan-GameCraft (Vanilla vs StableWorld)",
-        videos: [
-          { url: HF_BASE + "motion_imgae7.mp4", caption: "Vanilla" },
-          { url: HF_BASE + "motion_imgae8.mp4", caption: "StableWorld" },
-          { url: HF_BASE + "motion_imgae9.mp4", caption: "StableWorld" },
-        ]
-      }
-    ];
-
-    function buildVideoCard(item){
-      const card = document.createElement("div");
-      card.className = "video-card";
-
-      const thumb = document.createElement("div");
-      thumb.className = "card-thumb";
-      card.appendChild(thumb);
-
-      const v = document.createElement("video");
-      v.src = item.url;
-      v.controls = true;
-      v.muted = true;
-      v.playsInline = true;
-      v.preload = "metadata";
-
-      // 只播放前 30s：data-max=30
-      v.dataset.max = "30";
-
-      const markReady = () => setTimeout(() => card.classList.add("ready"), 120);
-      v.addEventListener("loadeddata", markReady);
-      v.addEventListener("canplay", markReady);
-
-      card.appendChild(v);
-      return card;
-    }
-
-    function renderResults(){
-      const root = document.getElementById("resultsRoot");
-      root.innerHTML = "";
-
-      RESULTS_GROUPS.forEach(group => {
-        const title = document.createElement("div");
-        title.className = "video-row-title";
-        title.textContent = group.title;
-        root.appendChild(title);
-
-        const grid = document.createElement("div");
-        grid.className = "video-grid";
-
-        group.videos.forEach(v => {
-          grid.appendChild(buildVideoCard(v));
-        });
-
-        root.appendChild(grid);
+      // duplicate for seamless scroll
+      firstBatch.forEach(name => {
+        row.appendChild(buildHeroCell(HF_DEMO_BASE + name));
       });
-    }
-
-    // 强制只循环前 N 秒（适用于任何 <video data-max="30">）
-    function enforceMaxSeconds(){
-      document.querySelectorAll("video[data-max]").forEach(v => {
-        const max = parseFloat(v.dataset.max || "0");
-        if(!max || isNaN(max)) return;
-
-        v.addEventListener("timeupdate", () => {
-          // 给一点 buffer，避免来回抖
-          if(v.currentTime >= max - 0.05){
-            v.currentTime = 0;
-            // 如果用户正在播放/自动播放，继续播
-            if(!v.paused){
-              v.play().catch(()=>{});
-            }
-          }
-        });
-      });
-    }
-
-    function initHeroWall(){
-      const rows = document.querySelectorAll("#videoWall .video-row");
-      rows.forEach(row => {
-        const count = parseInt(row.dataset.count || "10", 10);
-
-        // 先尽量用 icon，数量不够再用全量补
-        let bag = shuffle(HERO_VIDEOS.length ? HERO_VIDEOS : HERO_FALLBACK);
-        const firstBatch = [];
-
-        for(let i=0;i<count;i++){
-          if(bag.length === 0) bag = shuffle(HERO_FALLBACK);
-          const name = bag.pop();
-          const url = HF_BASE + name;
-          row.appendChild(buildHeroCell(url));
-          firstBatch.push(name);
-        }
-
-        // duplicate 一次实现无缝滚动（顺序一致）
-        firstBatch.forEach(name => {
-          row.appendChild(buildHeroCell(HF_BASE + name));
-        });
-      });
-    }
-
-    function copyBibtex(){
-      const text = document.getElementById("bibtexText").textContent;
-      navigator.clipboard.writeText(text).then(()=>{
-        alert("BibTeX copied!");
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      initHeroWall();
-      renderResults();
-      enforceMaxSeconds();
     });
-  </script>
+  }
+
+  /* ============ Matrix (bad vs good1) 2x compare ============ */
+  const HF_ROOT_BASE = "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/";
+  const MATRIX_BAD_BASE  = HF_ROOT_BASE + "matrix/bad/";
+  const MATRIX_GOOD_BASE = HF_ROOT_BASE + "matrix/good1/";
+
+  const MATRIX_FILES = [
+    "motion_3_icon.mp4",
+    "motion_image_icon.mp4",
+    "tmp_51s_59s.mp4",
+    "tmp_motion14_51s_59s.mp4",
+    "tmp_motion21_51s_59s.mp4",
+  ];
+
+  function buildVideoCard(url, label) {
+    const card = document.createElement("div");
+    card.className = "video-card";
+
+    const v = document.createElement("video");
+    v.src = url;
+    v.controls = true;
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = "metadata";
+    card.appendChild(v);
+
+    const cap = document.createElement("div");
+    cap.className = "video-caption";
+    cap.textContent = label;
+    card.appendChild(cap);
+
+    return card;
+  }
+
+  function renderMatrixCompare() {
+    const root = document.getElementById("resultsRoot");
+    if (!root) return;
+
+    root.innerHTML = "";
+
+    MATRIX_FILES.forEach((name) => {
+      const title = document.createElement("div");
+      title.className = "video-row-title";
+      title.textContent = name;
+      root.appendChild(title);
+
+      const grid = document.createElement("div");
+      grid.className = "compare-grid";
+
+      grid.appendChild(buildVideoCard(MATRIX_BAD_BASE + name,  "Original (matrix/bad)"));
+      grid.appendChild(buildVideoCard(MATRIX_GOOD_BASE + name, "StableWorld (matrix/good1)"));
+
+      root.appendChild(grid);
+    });
+  }
+
+  // 强制只循环前 N 秒（适用于任何 <video data-max="30">）
+  function enforceMaxSeconds(){
+    document.querySelectorAll("video[data-max]").forEach(v => {
+      const max = parseFloat(v.dataset.max || "0");
+      if(!max || isNaN(max)) return;
+
+      v.addEventListener("timeupdate", () => {
+        if(v.currentTime >= max - 0.05){
+          v.currentTime = 0;
+          if(!v.paused) v.play().catch(()=>{});
+        }
+      });
+    });
+  }
+
+  function copyBibtex(){
+    const text = document.getElementById("bibtexText")?.textContent || "";
+    navigator.clipboard.writeText(text).then(()=> alert("BibTeX copied!"));
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initHeroWall();
+    renderMatrixCompare();
+    enforceMaxSeconds();
+  });
+</script>
+
 </body>
 </html>
