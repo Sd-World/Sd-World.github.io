@@ -139,6 +139,9 @@
     .video-row:nth-child(3) {
       animation: scrollLeft 65s linear infinite;
     }
+  .video-row:nth-child(4) {
+    animation: scrollRight 62s linear infinite;
+  }
 
     @keyframes scrollLeft {
       0% {
@@ -160,21 +163,32 @@
       }
     }
 
-    .video-cell {
-      position: relative;
-      flex-shrink: 0;
-      width: calc(130vw / 5 - 5px);
-      height: 100%;
-      overflow: hidden;
-      border-radius: 8px;
-      background: #111;
-    }
+  .video-cell {
+    position: relative;
+    flex-shrink: 0;
+    width: calc(130vw / 5 - 5px);
+    height: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+  
+    /* 关键：非黑色占位，打开立刻好看 */
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.08), rgba(0,0,0,0.9));
+  }
+  
+  .video-cell video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  
+    /* 关键：默认隐藏，加载出首帧再显示 */
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+  
+  .video-cell.is-ready video {
+    opacity: 1;
+  }
 
-    .video-cell video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
 
     /* Light overlay for text readability - NO color tint */
     .hero-overlay {
@@ -711,14 +725,6 @@
     <div class="video-row" data-count="10"></div>
   </div>
 
-  <div class="hero-overlay"></div>
-
-
-
-
-
-
-    </div>
     <!-- Overlay - pure dark, no color tint -->
     <div class="hero-overlay"></div>
 
@@ -1491,21 +1497,35 @@
   function buildCell(filename) {
     const cell = document.createElement("div");
     cell.className = "video-cell";
-
+  
     const v = document.createElement("video");
     v.autoplay = true;
     v.muted = true;
     v.loop = true;
     v.playsInline = true;
-
+  
+    // 关键：更快拿到首帧（metadata 通常比 auto 更省）
+    v.preload = "metadata";
+  
+    // 关键：拿到首帧/可播放数据后，淡入显示
+    const onReady = () => cell.classList.add("is-ready");
+    v.addEventListener("loadeddata", onReady, { once: true });
+    v.addEventListener("canplay", onReady, { once: true });
+  
+    // 兜底：加载失败就保持占位，不要一片黑
+    v.addEventListener("error", () => {
+      cell.classList.add("is-ready"); // 也可以不加，让占位一直在
+    });
+  
     const s = document.createElement("source");
     s.src = HF_BASE + encodeURIComponent(filename);
     s.type = "video/mp4";
-
+  
     v.appendChild(s);
     cell.appendChild(v);
     return cell;
   }
+
 
   document.addEventListener("DOMContentLoaded", () => {
     const rows = document.querySelectorAll("#videoWall .video-row");
