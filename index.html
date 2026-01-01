@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="description"
-    content="Project website for Towards Stable and Consistent Long Interactive Video Generation">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="description" content="Project website for Towards Stable and Consistent Long Interactive Video Generation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stable World</title>
 
   <!-- Fonts -->
@@ -19,739 +17,390 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
-    :root {
-      --primary: #8b5cf6;
-      --primary-light: #a78bfa;
-      --primary-dark: #7c3aed;
-      --accent: #06b6d4;
-      --accent-pink: #ec4899;
-      --dark: #030014;
-      --dark-light: #0a0a1f;
-      --text: #f8fafc;
-      --text-muted: #9da8b8;
-      /* Light theme colors for content */
-      --light-bg: #ffffff;
-      --light-bg-alt: #f8fafc;
-      --light-text: #1e293b;
-      --light-text-muted: #64748b;
+    :root{
+      --primary:#8b5cf6;
+      --accent:#06b6d4;
+      --dark:#030014;
+      --text:#f8fafc;
+      --text-muted:#9da8b8;
+
+      --light-bg:#ffffff;
+      --light-bg-alt:#f7f9fc;
+      --light-text:#1e293b;
+      --light-text-muted:#64748b;
+
+      --divider:#f2c4c4; /* 标题下短红线（DiverseAR风格） */
+      --dashline: rgba(160,185,220,0.35); /* 分隔虚线颜色（DiverseAR风格） */
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      font-family:"Outfit", sans-serif;
+      background:var(--dark);
+      color:var(--text);
+      overflow-x:hidden;
     }
 
-    html {
-      scroll-behavior: smooth;
+    /* ===================== HERO ===================== */
+    .hero{
+      position:relative;
+      width:100vw;
+      height:100vh;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
-    body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--dark);
-      color: var(--text);
-      overflow-x: hidden;
+    .video-wall{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      opacity:0.55;
+      z-index:1;
     }
 
-    /* ============================================
-       HERO SECTION - Video Wall Background
-       ============================================ */
-    .hero {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .video-row{
+      display:flex;
+      gap:8px;
+      flex:1;
+      width:max-content;
+      will-change:transform;
     }
 
-    /* Video Grid Wall Background - Full screen, no perspective tilt */
-    .video-wall {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      opacity: 0.5;
-      z-index: 1;
+    .video-row:nth-child(1){ animation: scrollLeft 62s linear infinite; }
+    .video-row:nth-child(2){ animation: scrollRight 58s linear infinite; }
+    .video-row:nth-child(3){ animation: scrollLeft 68s linear infinite; }
+    .video-row:nth-child(4){ animation: scrollRight 65s linear infinite; }
+
+    @keyframes scrollLeft{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+    @keyframes scrollRight{ from{ transform:translateX(-50%);} to{ transform:translateX(0);} }
+
+    .video-cell{
+      position:relative;
+      flex-shrink:0;
+      width: calc(130vw / 5 - 8px);
+      height:100%;
+      overflow:hidden;
+      border-radius:10px;
+      background:#0b0b18;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
 
-    /* Citation Block */
-    .citation-block {
-      background: var(--light-bg-alt);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 12px;
-      padding: 1.5rem;
-      position: relative;
+    .video-cell video{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transform:scale(1.02);
+      filter:saturate(1.05);
     }
 
-    .citation-block pre {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.85rem;
-      line-height: 1.6;
-      color: var(--light-text);
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
+    /* 防黑屏：在视频 ready 前盖一个渐变 */
+    .video-thumb{
+      position:absolute;
+      inset:0;
+      background: radial-gradient(1200px 600px at 30% 30%, rgba(139,92,246,.35), transparent 60%),
+                  radial-gradient(1200px 600px at 70% 70%, rgba(6,182,212,.30), transparent 60%),
+                  rgba(0,0,0,0.55);
+      opacity:1;
+      transition:opacity 250ms ease;
+      z-index:2;
+    }
+    .video-cell.ready .video-thumb{ opacity:0; pointer-events:none; }
+
+    .hero-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.45);
+      z-index:2;
     }
 
-    .copy-btn {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .hero-content{
+      position:relative;
+      z-index:10;
+      text-align:center;
+      padding: 0 18px;
+      max-width: 1050px;
     }
 
-    .copy-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    }
-
-    /* Video Row */
-    .video-row {
-      display: flex;
-      gap: 6px;
-      flex: 1;
-      width: max-content;
-    }
-
-    /* Row animations - alternating directions */
-    .video-row:nth-child(1) {
-      animation: scrollLeft 60s linear infinite;
-    }
-
-    .video-row:nth-child(2) {
-      animation: scrollRight 55s linear infinite;
-    }
-
-    .video-row:nth-child(3) {
-      animation: scrollLeft 65s linear infinite;
-    }
-  .video-row:nth-child(4) {
-    animation: scrollRight 62s linear infinite;
-  }
-
-    @keyframes scrollLeft {
-      0% {
-        transform: translateX(0);
-      }
-
-      100% {
-        transform: translateX(-50%);
-      }
-    }
-
-    @keyframes scrollRight {
-      0% {
-        transform: translateX(-50%);
-      }
-
-      100% {
-        transform: translateX(0);
-      }
-    }
-
-.video-cell {
-  position: relative;
-  flex-shrink: 0;
-  width: calc(130vw / 5 - 5px);
-  height: 100%;
-  overflow: hidden;
-  border-radius: 8px;
-  background: #111;
-}
-
-.video-cell video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-
-
-
-    /* Light overlay for text readability - NO color tint */
-    .hero-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 2;
-    }
-
-    /* Hero Content Container */
-    .hero-content {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      padding: 2rem;
-      max-width: 1000px;
-    }
-
-    /* Title - Simple gradient */
-    .hero-title {
-      font-size: clamp(3rem, 8vw, 7rem);
+    .hero-title{
+      font-size: clamp(3rem, 8vw, 6.5rem);
       font-weight: 800;
-      margin-bottom: 1rem;
-      line-height: 1;
-      animation: fadeInUp 1s ease-out;
+      line-height:1;
+      margin-bottom: 14px;
     }
-
-    .hero-title .highlight {
+    .hero-title .highlight{
       background: linear-gradient(135deg, #a78bfa 0%, #06b6d4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
     }
-
-    .hero-subtitle {
-      font-size: clamp(1.2rem, 3vw, 1.9rem);
+    .hero-subtitle{
+      font-size: clamp(1.1rem, 2.6vw, 1.7rem);
       font-weight: 300;
       color: var(--text-muted);
-      margin-bottom: 2.5rem;
-      letter-spacing: 0.5px;
-      animation: fadeInUp 1s ease-out 0.2s backwards;
+      margin-bottom: 26px;
     }
 
-    .hero-subtitle .accent {
-      color: var(--accent);
-      font-weight: 400;
-    }
-
-    /* Authors */
-    .authors {
-      margin-bottom: 1rem;
-      animation: fadeInUp 1s ease-out 0.4s backwards;
-    }
-
-    .authors a {
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 400;
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .authors a::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: var(--primary-light);
-      transition: width 0.3s ease;
-    }
-
-    .authors a:hover {
-      color: var(--primary-light);
-    }
-
-    .authors a:hover::after {
-      width: 100%;
-    }
-
-    .authors sup {
-      color: var(--accent);
-      font-size: 0.65rem;
-      margin-left: 1px;
-    }
-
-    .corresponding {
-      font-size: 1rem;
-      color: var(--text-muted);
-      margin-top: 0.5rem;
-      font-style: italic;
-    }
-
-    /* Affiliations */
-    .affiliations {
-      font-size: 1rem;
-      color: var(--text-muted);
-      margin-bottom: 2.5rem;
+    .authors{
+      margin-top: 6px;
+      margin-bottom: 8px;
+      color: rgba(248,250,252,0.9);
+      font-size: 1.02rem;
       line-height: 1.8;
-      animation: fadeInUp 1s ease-out 0.5s backwards;
     }
-
-    .affiliations sup {
-      color: var(--accent);
-      margin-right: 2px;
-    }
-
-    /* Action Buttons */
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      animation: fadeInUp 1s ease-out 0.6s backwards;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 1rem 2rem;
-      border-radius: 60px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 1rem;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      border: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(255, 255, 255, 0.2),
-          transparent);
-      transition: left 0.5s ease;
-    }
-
-    .btn:hover::before {
-      left: 100%;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
-      color: white;
-      box-shadow:
-        0 4px 20px rgba(139, 92, 246, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow:
-        0 8px 30px rgba(139, 92, 246, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-outline {
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-outline:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--primary-light);
-      transform: translateY(-3px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .btn i {
-      font-size: 1.2rem;
-    }
-
-    /* Stats bar */
-    .stats-bar {
-      display: flex;
-      justify-content: center;
-      gap: 3rem;
-      margin-top: 3rem;
-      animation: fadeInUp 1s ease-out 0.7s backwards;
-    }
-
-    .stat-item {
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--primary-light), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
+    .affiliations{
       color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 0.25rem;
+      font-size: 0.98rem;
+      line-height: 1.8;
+      margin-bottom: 24px;
     }
 
-    /* Scroll Indicator */
-    .scroll-indicator {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 15;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      animation: fadeInUp 1s ease-out 0.9s backwards;
+    .hero-actions{
+      display:flex;
+      gap: 10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 8px;
     }
-
-    .scroll-text {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .scroll-line {
-      width: 1px;
-      height: 60px;
-      background: linear-gradient(180deg, var(--primary-light), transparent);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .scroll-line::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 20px;
-      background: var(--accent);
-      animation: scrollPulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes scrollPulse {
-      0% {
-        transform: translateY(-20px);
-        opacity: 0;
-      }
-
-      50% {
-        opacity: 1;
-      }
-
-      100% {
-        transform: translateY(60px);
-        opacity: 0;
-      }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(40px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ============================================
-       MAIN CONTENT SECTIONS - White Background
-       ============================================ */
-    .main-content {
-      background: var(--light-bg);
-      position: relative;
-    }
-
-    .section {
-      padding: 4rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-title {
-      font-size: 2.2rem;
-      font-weight: 600;
-      margin-bottom: 2rem;
-      /* display: flex; */
-      /* align-items: center; */
-      gap: 1rem;
-      color: var(--light-text);
-      text-align: center;
-    }
-
-  .section-title::after {
-    content: "";
-    display: block;
-    width: 48px;
-    height: 3px;
-    margin: 12px auto 0;
-  
-    background: #e06c6c;   /* 你截图里的红线颜色 */
-    border-radius: 2px;
-  }
-
-
-    /* Video Demo Section */
-    .video-demo {
-      background: var(--light-bg-alt);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(0, 0, 0, 0.05);
-    }
-
-    .video-container {
-      position: relative;
-      width: 100%;
-      padding-top: 56.25%;
-    }
-
-    .video-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* Video Gallery */
-    .video-gallery-group {
-      margin-bottom: 3rem;
-    }
-
-    .gallery-subtitle {
-      font-size: 1.3rem;
-      font-weight: 500;
-      color: var(--light-text);
-      margin-bottom: 1.2rem;
-      padding-left: 1rem;
-      border-left: 3px solid var(--primary);
-    }
-
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-    }
-
-    .video-item {
-      background: var(--light-bg-alt);
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 20px;
       border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      font-weight: 500;
+      text-decoration:none;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(10px);
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(167,139,250,0.6);
+    }
+    .btn-primary{
+      border:none;
+      background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+      box-shadow: 0 10px 25px rgba(139,92,246,0.30);
+    }
+    .btn-primary:hover{ box-shadow: 0 14px 35px rgba(139,92,246,0.38); }
+
+    /* ===================== MAIN (DiverseAR 风格) ===================== */
+    .main-content{
+      background: var(--light-bg);
+      color: var(--light-text);
     }
 
-    .video-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.12);
+    /* 关键：section 间距采用 DiverseAR 紧凑风格 */
+    .section{
+      padding: 16px 10px;
+      margin: 0 auto;
+      text-align:center;
+      max-width: 1200px;
     }
 
-    .video-item video {
+    .section-title{
+      font-size: 32px;
+      font-weight: 700;
+      margin-top: 20px;
+      margin-bottom: 5px;
+      color: var(--light-text);
+    }
+
+    .section-divider{
+      width: 80px;
+      height: 4px;
+      background: var(--divider);
+      margin: 10px auto 20px;
+    }
+
+    .section-divider-line{
       width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      display: block;
-    }
-
-    .video-caption {
-      padding: 0.8rem 1rem;
-      font-size: 0.9rem;
-      color: var(--light-text-muted);
-      text-align: center;
-    }
-
-    /* Responsive for video grid */
-    @media (max-width: 1024px) {
-      .video-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 640px) {
-      .video-grid {
-        grid-template-columns: 1fr;
-      }
+      height: 1px;
+      background: var(--dashline);
+      margin: 0;
     }
 
     /* Abstract */
-    .abstract-text {
-      font-size: 1.15rem;
-      line-height: 2;
+    .abstract-text{
+      font-size: 16px;
+      line-height: 24px;
+      width: 62%;
+      max-width: 900px;
+      margin: 20px auto 25px;
+      text-align: left;
       color: var(--light-text-muted);
     }
 
-    .abstract-text strong {
-      color: var(--light-text);
-      font-weight: 500;
-    }
-
-    /* Teaser */
-    .teaser-container {
+    /* Video Presentation (YouTube) */
+    .video-container{
+      width: 73%;
+      aspect-ratio: 16 / 9;
+      max-width: 1020px;
+      margin: 0 auto 10px;
+      border-radius: 14px;
+      overflow:hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.10);
       background: var(--light-bg-alt);
-      border: 1px solid rgba(139, 92, 246, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
-      margin-top: 2.5rem;
+    }
+    .video-container iframe{
+      width:100%;
+      height:100%;
+      border:0;
     }
 
-    .teaser-container img {
+    /* Figure card (shadow like your screenshot) */
+    .framework-container{
+      width: 85%;
+      max-width: 1050px;
+      margin: 0 auto 20px auto;
+    }
+    .framework-image{
       width: 100%;
       border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+      background: #fff;
+      display:block;
     }
-
-    /* Teaser */
-    .teaser-container2 {
-      /* background: var(--light-bg-alt); */
-      /* border: 1px solid rgba(139, 92, 246, 0.1); */
-      border-radius: 20px;
-      padding: 2rem;
-      margin-top: 2.5rem;
-    }
-
-    .teaser-container2 img {
-      width: 100%;
-      border-radius: 12px;
-    }
-
-
-    /* Framework Image */
-    .framework-image {
-      width: 100%;
-      border-radius: 16px;
-      margin: 1.5rem 0;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .image-caption {
-      font-size: 1rem;
+    .framework-text{
+      width: 85%;
+      max-width: 1050px;
+      margin: 14px auto 6px;
+      font-size: 16px;
+      line-height: 24px;
       color: var(--light-text-muted);
-      line-height: 1.8;
-      margin-top: 1.5rem;
-    }
-
-    /* Footer */
-    .footer {
       text-align: center;
-      padding: 3rem 2rem;
-      color: var(--light-text-muted);
-      font-size: 0.9rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-      background: var(--light-bg);
+    }
+
+    /* Video grids */
+    .video-row-title{
+      font-size: 18px;
+      font-weight: 700;
+      margin: 10px auto 10px;
+      width: 90%;
+      max-width: 1200px;
+      text-align: left;
+      color: var(--light-text);
+    }
+
+    .video-grid{
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto 22px auto;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .video-card{
+      position:relative;
+      border-radius: 12px;
+      overflow:hidden;
+      background: var(--light-bg-alt);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+    }
+    .video-card .card-thumb{
+      position:absolute;
+      inset:0;
+      background: linear-gradient(135deg, rgba(139,92,246,.10), rgba(6,182,212,.10)),
+                  #eef2ff;
+      opacity:1;
+      transition: opacity 200ms ease;
+      z-index:2;
+    }
+    .video-card.ready .card-thumb{ opacity:0; pointer-events:none; }
+
+    .video-card video{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    /* BibTeX */
+    .bibtex-card{
+      width: 97%;
+      max-width: 1160px;
+      margin: 28px auto 50px;
+      background:#ffffff;
+      border-radius: 14px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      padding: 18px 22px 24px;
+      text-align:left;
+    }
+    .bibtex-header{
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      color: var(--light-text);
+    }
+    .copy-btn{
+      padding: 8px 14px;
+      background: #4a6cff;
+      color: #fff;
+      border:none;
+      border-radius: 8px;
+      cursor:pointer;
+      font-size: 15px;
+    }
+    .copy-btn:hover{ background:#6f82ff; }
+    .bibtex-box{
+      background: var(--light-bg-alt);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      overflow-x:auto;
+      font-family: "Space Mono", monospace;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre;
+      color: #0f172a;
     }
 
     /* Responsive */
-    @media (max-width: 1024px) {
-      .video-cell {
-        width: calc(100vw / 4 - 5px);
-      }
+    @media (max-width: 1024px){
+      .video-cell{ width: calc(120vw / 4 - 8px); }
+      .video-grid{ grid-template-columns: repeat(2, 1fr); }
+      .abstract-text{ width: 86%; }
+      .video-container{ width: 92%; }
     }
-
-    @media (max-width: 768px) {
-      .authors a {
-        font-size: 0.9rem;
-      }
-
-      .affiliations {
-        font-size: 0.8rem;
-      }
-
-      .hero-actions {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .btn {
-        width: 100%;
-        max-width: 280px;
-        justify-content: center;
-      }
-
-      .stats-bar {
-        gap: 1.5rem;
-      }
-
-      .stat-value {
-        font-size: 1.4rem;
-      }
-
-      .video-cell {
-        width: calc(100vw / 3 - 4px);
-      }
+    @media (max-width: 640px){
+      .video-cell{ width: calc(120vw / 3 - 8px); }
+      .video-grid{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- ============================================
-       HERO SECTION
-       ============================================ -->
-<section class="hero" id="hero">
-  <div class="video-wall" id="videoWall">
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" id="hero">
+    <div class="video-wall" id="videoWall">
+      <div class="video-row" data-count="10"></div>
+      <div class="video-row" data-count="10"></div>
+      <div class="video-row" data-count="10"></div>
+      <div class="video-row" data-count="10"></div>
+    </div>
 
-    <!-- Row 1 -->
-    <div class="video-row" data-count="10"></div>
-
-    <!-- Row 2 -->
-    <div class="video-row" data-count="10"></div>
-
-    <!-- Row 3 -->
-    <div class="video-row" data-count="10"></div>
-      
-    <!-- Row 4 -->
-    <div class="video-row" data-count="10"></div>
-  </div>
-
-    <!-- Overlay - pure dark, no color tint -->
     <div class="hero-overlay"></div>
 
-    <!-- Hero Content -->
     <div class="hero-content">
-      <h1 class="hero-title">
-        <span class="highlight">Stable World </span>
-      </h1>
-      <p class="hero-subtitle">
-        Towards Stable and Consistent Long Interactive Video Generation
-      </p>
+      <h1 class="hero-title"><span class="highlight">Stable World</span></h1>
+      <p class="hero-subtitle">Towards Stable and Consistent Long Interactive Video Generation</p>
 
-      <!-- Authors -->
-      <!-- <div class="authors">
-        <a href="https://jianxgao.github.io/" target="_blank">Jianxiong Gao</a><sup>1</sup>,
-        <a href="https://frozenburning.github.io/" target="_blank">Zhaoxi Chen</a><sup>3</sup>,
-        <a href="https://alvinliu0.github.io/" target="_blank">Xian Liu</a><sup>4</sup>,
-        <a href="https://zhuang2002.github.io/" target="_blank">Junhao Zhuang</a><sup>5</sup>,
-        <a href="https://chmxu.github.io/" target="_blank">Chengming Xu</a><sup>1</sup>,
-        <br>
-        <a href="https://www.dcs.warwick.ac.uk/~feng/" target="_blank">Jianfeng Feng</a><sup>1</sup>,
-        <a href="https://mmlab.siat.ac.cn/yuqiao" target="_blank">Yu Qiao</a><sup>6</sup>,
-        <a href="https://yanweifu.github.io/" target="_blank">Yanwei Fu</a><sup>1†</sup>,
-        <a href="https://chenyangsi.top/" target="_blank">Chenyang Si</a><sup>2†</sup>,
-        <a href="https://liuziwei7.github.io/" target="_blank">Ziwei Liu</a><sup>3†</sup>
-        <p class="corresponding">† corresponding authors</p>
-      </div> -->
-
-      <!-- Affiliations -->
-      <div class="affiliations">
+      <!-- 你名字不要改：这里保持你原写法（只是排版更干净） -->
+      <div class="authors">
         <sup>1</sup>Ying Yang &nbsp;&nbsp;
         <sup>2</sup>Zhengyao Lv &nbsp;&nbsp;
         <sup>3</sup>Tianlin Pan &nbsp;&nbsp;
@@ -760,659 +409,331 @@
         <sup>6</sup>Hubery Yin &nbsp;&nbsp;
         <sup>6</sup>HChen Li &nbsp;&nbsp;
         <sup>6</sup>Ziwei Liu &nbsp;&nbsp;
-        <sup>6</sup>Chenyang Si &nbsp;&nbsp;
-
-
-
+        <sup>6</sup>Chenyang Si
       </div>
 
       <div class="affiliations">
         <sup>1</sup>PRLab, Nanjing University &nbsp;&nbsp;
         <sup>2</sup>The University of Hong Kong &nbsp;&nbsp;
         <sup>3</sup>University of Chinese Academy of Sciences &nbsp;&nbsp;
-        <sup>4</sup>Lovart AI&nbsp;&nbsp;
-        <sup>5</sup>WeChat, Tencent Inc.&nbsp;&nbsp;
-        <sup>6</sup>Nanyang Technological University&nbsp;&nbsp;
+        <sup>4</sup>Lovart AI &nbsp;&nbsp;
+        <sup>5</sup>WeChat, Tencent Inc. &nbsp;&nbsp;
+        <sup>6</sup>Nanyang Technological University
       </div>
 
-      <!-- Action Buttons -->
       <div class="hero-actions">
         <a href="https://arxiv.org/abs/2512.13604" target="_blank" class="btn btn-primary">
-          <i class="bi bi-file-earmark-text"></i>
-          Arxiv
+          <i class="bi bi-file-earmark-text"></i> Arxiv
         </a>
-        <a href="https://github.com/Sd-World" target="_blank" class="btn btn-outline">
-          <i class="bi bi-github"></i>
-          Code
+        <a href="https://github.com/Sd-World" target="_blank" class="btn">
+          <i class="bi bi-github"></i> Code
         </a>
-        <a href="https://youtu.be/ln1kMNYj50Y" class="btn btn-outline">
-          <i class="bi bi-play-circle"></i>
-          Video
+        <a href="#video-presentation" class="btn">
+          <i class="bi bi-play-circle"></i> Video
         </a>
       </div>
-
-
-    </div>
-
-    <!-- Scroll Indicator -->
-    <div class="scroll-indicator">
-      <span class="scroll-text">Scroll</span>
-      <div class="scroll-line"></div>
     </div>
   </section>
 
-  <!-- ============================================
-       MAIN CONTENT - White Background
-       ============================================ -->
+  <!-- ===================== MAIN ===================== -->
   <main class="main-content">
 
-    <!-- Video Demo Section -->
-<section class="section" id="video-demo">
-  <h2 class="section-title">Video Presentation</h2>
+    <!-- Video Presentation -->
+    <section class="section" id="video-presentation">
+      <h2 class="section-title">Video Presentation</h2>
+      <div class="section-divider"></div>
 
-  <div class="video-demo">
-    <div class="video-container">
-      <iframe
-        src="https://www.youtube.com/embed/M9JIGIk9hEM?rel=0&modestbranding=1"
-        title="Video Presentation"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen>
-      </iframe>
-    </div>
-  </div>
-</section>
+      <div class="video-container">
+        <iframe
+          src="https://www.youtube.com/embed/M9JIGIk9hEM"
+          title="StableWorld Video Presentation"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </section>
 
+    <div class="section-divider-line"></div>
 
-    <!-- Abstract Section -->
+    <!-- Abstract -->
     <section class="section" id="abstract">
       <h2 class="section-title">Abstract</h2>
-  <p class="abstract-text">
-  In this paper, we explore the overlooked challenge of stability and temporal consistency in interactive video generation, which synthesizes dynamic and controllable video worlds through interactive behaviors such as camera movements and text prompts. Despite remarkable progress in world modeling, current methods still suffer from severe instability and temporal degradation, often leading to spatial drift and scene collapse during long-horizon interactions. To better understand this issue, we initially investigate the underlying causes of instability and identify that the major source of error accumulation originates from the same scene, where generated frames gradually deviate from the initial clean state and propagate errors to subsequent frames. Building upon this observation, we propose a simple yet effective method, <strong>StableWorld</strong>, a Dynamic Frame Eviction Mechanism. By continuously filtering out degraded frames while retaining geometrically consistent ones, StableWorld effectively prevents cumulative drift at its source, leading to more stable and temporal consistency of interactive generation. Promising results on multiple interactive video models, e.g., Matrix-Game, Open-Oasis, and Hunyuan-GameCraft, demonstrate that StableWorld is model-agnostic and can be applied to different interactive video generation frameworks to substantially improve stability, temporal consistency, and generalization across diverse interactive scenarios.
-  </p>
+      <div class="section-divider"></div>
 
-
-      <div class="teaser-container2">
-
-
-        <!-- <p class="image-caption">
-         Scene collapse over time: a common promblem faced by current world models. 
-        </p> -->
-      </div>
-    </section>
-
-
-
-<section class="section" id="framework">
-  <h2 class="section-title">Overall Framework of StableWorld</h2>
-
-  <img
-    src="https://raw.githubusercontent.com/Sd-World/Sd-World.github.io/main/overnew_01.png"
-    alt="Overall Framework of StableWorld"
-    class="framework-image"
-    style="max-width: 95%; display: block; margin: 0 auto;"
-  />
-
-  <p class="image-caption" style="text-align: center; margin-top: 1rem;">
-    StableWorld dynamically evicts degraded frames while retaining geometrically
-    consistent frames to prevent cumulative drift and improve temporal stability
-    in interactive video generation.
-  </p>
-</section>
-
-
-
-
-
-
-    <!-- Video Gallery Section -->
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">Visual Results: Matrix-game 2.0 and StableWorld
-      </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
-      </div>
-      <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
+      <p class="abstract-text">
+        In this paper, we explore the overlooked challenge of stability and temporal consistency in interactive video generation,
+        which synthesizes dynamic and controllable video worlds through interactive behaviors such as camera movements and text prompts.
+        Despite remarkable progress in world modeling, current methods still suffer from severe instability and temporal degradation,
+        often leading to spatial drift and scene collapse during long-horizon interactions. To better understand this issue, we initially
+        investigate the underlying causes of instability and identify that the major source of error accumulation originates from the same scene,
+        where generated frames gradually deviate from the initial clean state and propagate errors to subsequent frames. Building upon this observation,
+        we propose a simple yet effective method, <strong>StableWorld</strong>, a Dynamic Frame Eviction Mechanism. By continuously filtering out degraded frames
+        while retaining geometrically consistent ones, StableWorld effectively prevents cumulative drift at its source, leading to more stable and temporal
+        consistency of interactive generation. Promising results on multiple interactive video models, e.g., Matrix-Game, Open-Oasis, and Hunyuan-GameCraft,
+        demonstrate that StableWorld is model-agnostic and can be applied to different interactive video generation frameworks to substantially improve stability,
+        temporal consistency, and generalization across diverse interactive scenarios.
       </p>
-      </h2>
-
     </section>
 
+    <div class="section-divider-line"></div>
 
-    <!-- Video Gallery Section -->
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">More Visual Results: Matrix-game 2.0 and StableWorld
+    <!-- Framework -->
+    <section class="section" id="framework">
+      <h2 class="section-title">Overall Framework of StableWorld</h2>
+      <div class="section-divider"></div>
 
-      </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
+      <div class="framework-container">
+        <img
+          src="https://raw.githubusercontent.com/Sd-World/Sd-World.github.io/main/overnew_01.png"
+          alt="Overall Framework of StableWorld"
+          class="framework-image"
+        />
       </div>
-      <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
+
+      <p class="framework-text">
+        StableWorld dynamically evicts degraded frames while retaining geometrically consistent frames to prevent cumulative drift and improve temporal stability
+        in interactive video generation.
       </p>
-      </h2>
-
     </section>
 
+    <div class="section-divider-line"></div>
 
-    <!-- Video Gallery Section -->
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">Visual Results: Open-oasis and StableWorld
+    <!-- Results (HF videos) -->
+    <section class="section" id="results">
+      <h2 class="section-title">Visual Results</h2>
+      <div class="section-divider"></div>
 
+      <div id="resultsRoot"></div>
 
-      </h2>
+      <p class="abstract-text" style="margin-top: 10px;">
+        Tip: All demo videos below are configured to loop only the first <strong>30 seconds</strong>.
+      </p>
+    </section>
 
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
+    <div class="section-divider-line"></div>
 
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
+    <!-- BibTeX -->
+    <div class="bibtex-card" id="bibtex">
+      <div class="bibtex-header">
+        📚 BibTeX
+        <button class="copy-btn" onclick="copyBibtex()">📄 Copy</button>
       </div>
-      <!-- <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
-      </p> -->
-      </h2>
 
-    </section>
-
-    <!-- Video Gallery Section -->
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">Visual Results: Hunyuan-game. and StableWorld  
-
-
-
-      </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
-      </div>
-      <!-- <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
-      </p> -->
-      </h2>
-
-    </section>
-
-        <!-- Video Gallery Section -->
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">Ultra-long video generation (thousands of frames): StableWorld  
-      </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-    
-        </div>
-      </div>
-      <!-- <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
-      </p> -->
-      </h2>
-
-    </section>
-
-    <section class="section" id="video-gallery">
-      <h2 class="section-title">Ultra-long video generation (thousands of frames): StableWorld  
-      </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
-      </div>
-      <!-- <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
-      </p> -->
-      </h2>
-
-    </section>
-
-       <section class="section" id="video-gallery">
-      <h2 class="section-title">More Visual Results: Autoregressive Video Generation
- Self-forcing  and StableWorld
- 
-      </h2>
-
-      <div class="video-gallery-group">
-        <!-- <h3 class="gallery-subtitle">Character World</h3> -->
-        <div class="video-grid">
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_spring.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption">5× Speed </p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_autumn.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-          <div class="video-item">
-            <video controls muted loop playsinline>
-              <source src="assets/videos/ride_horse_game_winter.mp4" type="video/mp4">
-            </video>
-            <p class="video-caption"> 5× Speed</p>
-          </div>
-        </div>
-      </div>
-      <!-- <p class="image-caption">
-        both settings follow the same action instructions, the one retaining early frames too long prevents proper scene
-        switching
-      </p> -->
-      </h2>
-
-    </section>
-
-
-    <!-- Citation Section -->
-    <section class="section" id="citation">
-      <h2 class="section-title">BibTeX</h2>
-      <div class="citation-block">
-        <pre id="citation-text">@misc{gao2025longvie2,
-  title={LongVie 2: Multimodal Controllable Ultra-Long Video World Model}, 
-  author={Jianxiong Gao and Zhaoxi Chen and Xian Liu and Junhao Zhuang and Chengming Xu and Jianfeng Feng and Yu Qiao and Yanwei Fu and Chenyang Si and Ziwei Liu},
+      <pre class="bibtex-box" id="bibtexText">@misc{stableworld2025,
+  title={StableWorld: Towards Stable and Consistent Long Interactive Video Generation},
+  author={Ying Yang and Zhengyao Lv and Tianlin Pan and Haofan Wang and Binxin Yang and Hubery Yin and Chen Li and Ziwei Liu and Chenyang Si},
   year={2025},
   eprint={2512.13604},
   archivePrefix={arXiv},
-  primaryClass={cs.CV},
-  url={https://arxiv.org/abs/2512.13604}, 
+  primaryClass={cs.CV}
 }</pre>
-        <button class="copy-btn" onclick="copyBibtex()">
-          <i class="bi bi-clipboard"></i> Copy
-        </button>
-      </div>
-    </section>
+    </div>
 
   </main>
-  <!-- JavaScript -->
+
   <script>
-    function copyBibtex() {
-      const text = document.getElementById('citation-text').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.copy-btn');
-        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
-        setTimeout(() => {
-          btn.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
-        }, 2000);
+    /* ============ 你 HF 视频池（hero 背景用） ============ */
+    const HF_BASE = "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/demo/";
+
+    const VIDEO_POOL = [
+      "motion_imgae1.mp4","motion_imgae1_icon.mp4",
+      "motion_imgae2.mp4","motion_imgae2_icon.mp4",
+      "motion_imgae3.mp4","motion_imgae3_icon.mp4",
+      "motion_imgae4.mp4","motion_imgae4_icon.mp4",
+      "motion_imgae5.mp4","motion_imgae5_icon.mp4",
+      "motion_imgae6.mp4","motion_imgae6_icon.mp4",
+      "motion_imgae7.mp4","motion_imgae7_icon.mp4",
+      "motion_imgae8.mp4","motion_imgae8_icon.mp4",
+      "motion_imgae9.mp4","motion_imgae9_icon.mp4",
+      "motion_imgae10.mp4","motion_imgae10_icon.mp4",
+      "motion_imgae11.mp4","motion_imgae11_icon.mp4",
+      "motion_imgae12.mp4","motion_imgae12_icon.mp4",
+      "motion_imgae13.mp4","motion_imgae13_icon.mp4",
+      "motion_imgae14.mp4",
+      "motion_imgae15.mp4","motion_imgae15_icon.mp4",
+      "motion_imgae16.mp4",
+      "motion_imgae17.mp4",
+      "motion_imgae21_icon.mp4",
+      "motion_imgae22.mp4",
+      "motion_imgae23.mp4",
+      "motion_imgae24_icon.mp4",
+      "motion_imgae25.mp4","motion_imgae25_icon.mp4",
+      "motion_imgae26.mp4",
+      "motion_imgae29_icon.mp4"
+    ];
+
+    // Hero 背景建议用 _icon 版省流量（你要全用也行）
+    const HERO_VIDEOS = VIDEO_POOL.filter(v => v.includes("_icon")) ;
+    const HERO_FALLBACK = VIDEO_POOL.slice(); // 如果 icon 不够会用这个补
+
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    }
+
+    function buildHeroCell(src){
+      const cell = document.createElement("div");
+      cell.className = "video-cell";
+
+      const thumb = document.createElement("div");
+      thumb.className = "video-thumb";
+      cell.appendChild(thumb);
+
+      const v = document.createElement("video");
+      v.muted = true;
+      v.autoplay = true;
+      v.loop = true;
+      v.playsInline = true;
+      v.preload = "metadata";
+      v.src = src;
+
+      // 视频能播了就把 thumb 淡掉，避免黑屏
+      const markReady = () => {
+        // 给一点延迟，首帧更稳
+        setTimeout(() => cell.classList.add("ready"), 120);
+      };
+      v.addEventListener("loadeddata", markReady);
+      v.addEventListener("canplay", markReady);
+
+      cell.appendChild(v);
+      return cell;
+    }
+
+    /* ============ 结果区：你只需要改这个配置就能加/删视频 ============ */
+    const RESULTS_GROUPS = [
+      {
+        title: "Matrix-Game 2.0 (Vanilla vs StableWorld)",
+        // 这里先示例用你 demo 目录里的若干 mp4，你可以换成真实结果视频
+        videos: [
+          { url: HF_BASE + "motion_imgae1.mp4", caption: "Vanilla" },
+          { url: HF_BASE + "motion_imgae2.mp4", caption: "StableWorld" },
+          { url: HF_BASE + "motion_imgae3.mp4", caption: "StableWorld" },
+        ]
+      },
+      {
+        title: "Open-Oasis (Vanilla vs StableWorld)",
+        videos: [
+          { url: HF_BASE + "motion_imgae4.mp4", caption: "Vanilla" },
+          { url: HF_BASE + "motion_imgae5.mp4", caption: "StableWorld" },
+          { url: HF_BASE + "motion_imgae6.mp4", caption: "StableWorld" },
+        ]
+      },
+      {
+        title: "Hunyuan-GameCraft (Vanilla vs StableWorld)",
+        videos: [
+          { url: HF_BASE + "motion_imgae7.mp4", caption: "Vanilla" },
+          { url: HF_BASE + "motion_imgae8.mp4", caption: "StableWorld" },
+          { url: HF_BASE + "motion_imgae9.mp4", caption: "StableWorld" },
+        ]
+      }
+    ];
+
+    function buildVideoCard(item){
+      const card = document.createElement("div");
+      card.className = "video-card";
+
+      const thumb = document.createElement("div");
+      thumb.className = "card-thumb";
+      card.appendChild(thumb);
+
+      const v = document.createElement("video");
+      v.src = item.url;
+      v.controls = true;
+      v.muted = true;
+      v.playsInline = true;
+      v.preload = "metadata";
+
+      // 只播放前 30s：data-max=30
+      v.dataset.max = "30";
+
+      const markReady = () => setTimeout(() => card.classList.add("ready"), 120);
+      v.addEventListener("loadeddata", markReady);
+      v.addEventListener("canplay", markReady);
+
+      card.appendChild(v);
+      return card;
+    }
+
+    function renderResults(){
+      const root = document.getElementById("resultsRoot");
+      root.innerHTML = "";
+
+      RESULTS_GROUPS.forEach(group => {
+        const title = document.createElement("div");
+        title.className = "video-row-title";
+        title.textContent = group.title;
+        root.appendChild(title);
+
+        const grid = document.createElement("div");
+        grid.className = "video-grid";
+
+        group.videos.forEach(v => {
+          grid.appendChild(buildVideoCard(v));
+        });
+
+        root.appendChild(grid);
       });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      // Smooth scroll
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute('href'));
-          if (target) {
-            target.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
+    // 强制只循环前 N 秒（适用于任何 <video data-max="30">）
+    function enforceMaxSeconds(){
+      document.querySelectorAll("video[data-max]").forEach(v => {
+        const max = parseFloat(v.dataset.max || "0");
+        if(!max || isNaN(max)) return;
+
+        v.addEventListener("timeupdate", () => {
+          // 给一点 buffer，避免来回抖
+          if(v.currentTime >= max - 0.05){
+            v.currentTime = 0;
+            // 如果用户正在播放/自动播放，继续播
+            if(!v.paused){
+              v.play().catch(()=>{});
+            }
           }
         });
       });
+    }
 
-      // Parallax on scroll
-      window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const hero = document.querySelector('.hero-content');
+    function initHeroWall(){
+      const rows = document.querySelectorAll("#videoWall .video-row");
+      rows.forEach(row => {
+        const count = parseInt(row.dataset.count || "10", 10);
 
-        if (hero && scrolled < window.innerHeight) {
-          hero.style.transform = `translateY(${scrolled * 0.3}px)`;
-          hero.style.opacity = 1 - (scrolled / (window.innerHeight * 0.8));
+        // 先尽量用 icon，数量不够再用全量补
+        let bag = shuffle(HERO_VIDEOS.length ? HERO_VIDEOS : HERO_FALLBACK);
+        const firstBatch = [];
+
+        for(let i=0;i<count;i++){
+          if(bag.length === 0) bag = shuffle(HERO_FALLBACK);
+          const name = bag.pop();
+          const url = HF_BASE + name;
+          row.appendChild(buildHeroCell(url));
+          firstBatch.push(name);
         }
+
+        // duplicate 一次实现无缝滚动（顺序一致）
+        firstBatch.forEach(name => {
+          row.appendChild(buildHeroCell(HF_BASE + name));
+        });
       });
+    }
+
+    function copyBibtex(){
+      const text = document.getElementById("bibtexText").textContent;
+      navigator.clipboard.writeText(text).then(()=>{
+        alert("BibTeX copied!");
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initHeroWall();
+      renderResults();
+      enforceMaxSeconds();
     });
   </script>
-  
-<script>
-  const HF_BASE =
-    "https://huggingface.co/datasets/yycfq/stableworld/resolve/main/demo/";
-
-  const VIDEO_POOL = [
-    "motion_imgae1.mp4",
-    "motion_imgae1_icon.mp4",
-    "motion_imgae2.mp4",
-    "motion_imgae2_icon.mp4",
-    "motion_imgae3.mp4",
-    "motion_imgae3_icon.mp4",
-    "motion_imgae4.mp4",
-    "motion_imgae4_icon.mp4",
-    "motion_imgae5.mp4",
-    "motion_imgae5_icon.mp4",
-    "motion_imgae6.mp4",
-    "motion_imgae6_icon.mp4",
-    "motion_imgae7.mp4",
-    "motion_imgae7_icon.mp4",
-    "motion_imgae8.mp4",
-    "motion_imgae8_icon.mp4",
-    "motion_imgae9.mp4",
-    "motion_imgae9_icon.mp4",
-    "motion_imgae10.mp4",
-    "motion_imgae10_icon.mp4",
-    "motion_imgae11.mp4",
-    "motion_imgae11_icon.mp4",
-    "motion_imgae12.mp4",
-    "motion_imgae12_icon.mp4",
-    "motion_imgae13.mp4",
-    "motion_imgae13_icon.mp4",
-    "motion_imgae14.mp4",
-    "motion_imgae15.mp4",
-    "motion_imgae15_icon.mp4",
-    "motion_imgae16.mp4",
-    "motion_imgae17.mp4",
-    "motion_imgae21_icon.mp4",
-    "motion_imgae22.mp4",
-    "motion_imgae23.mp4",
-    "motion_imgae24_icon.mp4",
-    "motion_imgae25.mp4",
-    "motion_imgae25_icon.mp4",
-    "motion_imgae26.mp4",
-    "motion_imgae29_icon.mp4",
-  ];
-
-  function shuffle(arr) {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  function buildCell(filename) {
-    const cell = document.createElement("div");
-    cell.className = "video-cell";
-  
-    const v = document.createElement("video");
-    v.autoplay = true;
-    v.muted = true;
-    v.playsInline = true;
-    v.preload = "auto";
-    v.loop = false; // 关键：别用原生 loop
-  
-    const s = document.createElement("source");
-    s.src = HF_BASE + encodeURIComponent(filename);
-    s.type = "video/mp4";
-    v.appendChild(s);
-  
-    // ✅ 只播前 30s
-    const LIMIT = 30;
-    v.addEventListener("timeupdate", () => {
-      // 给一点容错，避免反复触发抖动
-      if (v.currentTime >= LIMIT - 0.05) {
-        v.currentTime = 0;
-        // 有些浏览器跳回 0 后需要再次 play
-        if (v.paused) v.play().catch(() => {});
-      }
-    });
-  
-    cell.appendChild(v);
-    return cell;
-  }
-
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const rows = document.querySelectorAll("#videoWall .video-row");
-
-    rows.forEach((row) => {
-      const count = parseInt(row.dataset.count || "10", 10);
-      let bag = shuffle(VIDEO_POOL);
-
-      // 第一段
-      const firstBatch = [];
-      for (let i = 0; i < count; i++) {
-        if (bag.length === 0) bag = shuffle(VIDEO_POOL);
-        const name = bag.pop();
-        row.appendChild(buildCell(name));
-        firstBatch.push(name);
-      }
-
-      // duplicate 一次做无缝滚动（第二段必须同序）
-      firstBatch.forEach((name) => row.appendChild(buildCell(name)));
-    });
-  });
-</script>
-
-
-
 </body>
-
 </html>
