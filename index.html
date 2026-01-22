@@ -172,6 +172,27 @@
       line-height: 1.9;
       margin-bottom: 24px;
     }
+    /* 作者链接样式 */
+    .authors a {
+      color: rgba(248,250,252,0.92);   /* 和作者文字一致 */
+      text-decoration: none;           /* 去掉下划线 */
+      transition: color 0.2s ease;
+    }
+    
+    .authors a:hover {
+      color: #7dd3fc;                  /* hover 时淡蓝色 */
+    }
+    
+    /* 机构链接样式 */
+    .affiliations a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    
+    .affiliations a:hover {
+      color: #7dd3fc;
+    }
 
     .hero-actions{
       display:flex;
